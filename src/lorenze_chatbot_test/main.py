@@ -1,21 +1,19 @@
 #!/usr/bin/env python
-from pydantic import Field
-
 from crewai import Agent, Flow
-from crewai.flow import listen, start
 from crewai.experimental.conversational import (
     ConversationConfig,
     ConversationState,
 )
-from crewai_tools import SerperDevTool
+from crewai.flow import listen, start
+from crewai_tools import EXASearchTool
+from pydantic import Field
 
 from lorenze_chatbot_test.crews.poem_crew.poem_crew import PoemCrew
-
 
 # Hardcoded profiles -> route permissions. In a real app this comes from auth.
 PROFILES = {
     "lorenze": {
-        "internet_search": True,   # can run the deep-research route
+        "internet_search": True,  # can run the deep-research route
         "poem_generation": False,  # cannot run the generic poem route
     },
 }
@@ -36,6 +34,7 @@ class ChatState(ConversationState):
 @ConversationConfig(defer_trace_finalization=True, llm="gpt-5.4-mini")
 class ProfileChatFlow(Flow[ChatState]):
     conversational = True
+    stream = True
 
     @start()
     def load_profile(self) -> None:
@@ -49,8 +48,11 @@ class ProfileChatFlow(Flow[ChatState]):
             return  # already loaded for this session
         self.state.user = "lorenze"
         self.state.permissions = dict(PROFILES[self.state.user])
-        allowed = [r for r, perm in ROUTE_PERMISSIONS.items()
-                   if self.state.permissions.get(perm)]
+        allowed = [
+            r
+            for r, perm in ROUTE_PERMISSIONS.items()
+            if self.state.permissions.get(perm)
+        ]
         profile = (
             f"Profile loaded for {self.state.user}. "
             f"Allowed routes: {', '.join(allowed) or 'none'}."
@@ -70,7 +72,9 @@ class ProfileChatFlow(Flow[ChatState]):
 
         if "poem" in message:
             intent = "POEM"
-        elif any(k in message for k in ("research", "search", "find", "look up", "news")):
+        elif any(
+            k in message for k in ("research", "search", "find", "look up", "news")
+        ):
             intent = "DEEP_RESEARCH"
         else:
             return "converse"
@@ -88,7 +92,7 @@ class ProfileChatFlow(Flow[ChatState]):
                 "You scour the web for current, credible information and always "
                 "cite your sources."
             ),
-            tools=[SerperDevTool()],
+            tools=[EXASearchTool()],
         )
 
     @listen("DEEP_RESEARCH")
