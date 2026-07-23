@@ -10,7 +10,6 @@ from pydantic import Field
 
 from lorenze_chatbot_test.crews.poem_crew.poem_crew import PoemCrew
 
-# Hardcoded profiles -> route permissions. In a real app this comes from auth.
 PROFILES = {
     "lorenze": {
         "internet_search": True,  # can run the deep-research route
@@ -34,7 +33,6 @@ class ChatState(ConversationState):
 @ConversationConfig(defer_trace_finalization=True, llm="gpt-5.4-mini")
 class ProfileChatFlow(Flow[ChatState]):
     conversational = True
-    stream = True
 
     @start()
     def load_profile(self) -> None:
@@ -67,7 +65,7 @@ class ProfileChatFlow(Flow[ChatState]):
         return bool(self.state.permissions.get(required, False))
 
     def route_turn(self, context):
-        # load_profile (an @start) has already run this turn, so permissions are set.
+        "This is where you "
         message = (self.state.current_user_message or "").lower()
 
         if "poem" in message:
