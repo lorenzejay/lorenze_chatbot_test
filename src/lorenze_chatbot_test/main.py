@@ -33,6 +33,7 @@ class ChatState(ConversationState):
 @ConversationConfig(defer_trace_finalization=True, llm="gpt-5.4-mini")
 class ProfileChatFlow(Flow[ChatState]):
     conversational = True
+    stream = True
 
     @start()
     def load_profile(self) -> None:
