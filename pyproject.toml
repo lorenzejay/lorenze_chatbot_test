@@ -5,7 +5,7 @@ description = "lorenze-chatbot-test using crewAI"
 authors = [{ name = "Your Name", email = "you@example.com" }]
 requires-python = ">=3.10,<3.14"
 dependencies = [
-    "crewai[tools]==1.15.10",
+    "crewai[tools]==1.15.25",
     "exa-py>=2.15.0",
 ]
 
